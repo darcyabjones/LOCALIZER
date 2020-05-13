@@ -21,12 +21,7 @@
 
     Contact: jana.sperschneider@csiro.au
 """
-# -----------------------------------------------------------------------------------------------------------
-# -----------------------------------------------------------------------------------------------------------
-# -----------------------------------------------------------------------------------------------------------
-# -----------------------------------------------------------------------------------------------------------
-# -----------------------------------------------------------------------------------------------------------
-# -----------------------------------------------------------------------------------------------------------
+
 import os
 import sys
 import errno
@@ -38,45 +33,60 @@ import localization
 import multiprocessing
 from multiprocessing import Pool
 import tempfile
-# -----------------------------------------------------------------------------------------------------------
 
-# -----------------------------------------------------------------------------------------------------------
-# -----------------------------------------------------------------------------------------------------------
-# -----------------------------------------------------------------------------------------------------------
-# Main Program starts here
-# -----------------------------------------------------------------------------------------------------------
-# -----------------------------------------------------------------------------------------------------------
-# -----------------------------------------------------------------------------------------------------------
 
-# -----------------------------------------------------------------------------------------------------------
-# -----------------------------------------------------------------------------------------------------------
-if __name__ == '__main__':    
-    SCRIPT_PATH = sys.path[0]
-    # -----------------------------------------------------------------------------------------------------------
-    # Change the path to WEKA to the appropriate location on your computer
-    WEKA_PATH = SCRIPT_PATH + '/weka-3-6-12/weka.jar'
-    PEPSTATS_PATH = SCRIPT_PATH + '/EMBOSS-6.5.7/emboss/'
+def get_weka_path(script_path):
+
+    weka_path = os.environ.get("WEKA36")
+    if weka_path is None:
+        weka_path = os.path.join(script_path, 'weka-3-6-12', 'weka.jar')
+    else:
+        weka_path = os.path.join(weka_path, 'weka.jar')
+
     # -----------------------------------------------------------------------------------------------------------
     # Check that the path to the WEKA software exists
-    path_exists = os.access(WEKA_PATH, os.F_OK)
+    path_exists = os.access(weka_path, os.F_OK)
     if not path_exists:
         print()
         print("Path to WEKA software does not exist!")
-        print("Check the installation and the given path to the WEKA software %s in LOCALIZER.py (line 62)." % WEKA_PATH)
+        print("Check the installation and the given path to the WEKA software {} in LOCALIZER.py (line 42).".format(weka_path))
+        print("Alternatively set the environment variable 'WEKA36' to point to the folder containing the weka.jar file.")
         print()
         sys.exit(1)
-    # -----------------------------------------------------------------------------------------------------------
+    
+    return weka_path
+
+
+def get_emboss_path(script_path):
+    emboss_path = shutil.which("pepstats")
+    if emboss_path is None:
+        emboss_path = os.path.join(script_path, 'EMBOSS-6.5.7', 'emboss')
+    else:
+        emboss_path = os.path.split(emboss_path)[0]
+
     # Check that the path to the EMBOSS software exists for pepstats
-    path_exists = os.access(PEPSTATS_PATH, os.F_OK)
+    path_exists = os.access(emboss_path, os.F_OK)
     if not path_exists:
         print()
         print("Path to EMBOSS software does not exist!")
-        print("Check the installation and the given path to the EMBOSS software %s in LOCALIZER.py (line 63)." % PEPSTATS_PATH)
+        print("Check the installation and the given path to the EMBOSS software {} in LOCALIZER.py (line 64).".format(emboss_path))
+        print("Alternatively, make sure that pepstats is in a directory on your PATH.")
         print()
         sys.exit(1)
-    # -----------------------------------------------------------------------------------------------------------
+
+    return emboss_path
+
+
+def main():
+    import localization
+    SCRIPT_PATH = sys.path[0]
+
+    # Change the path to WEKA to the appropriate location on your computer
+    WEKA_PATH = get_weka_path(SCRIPT_PATH)
+    PEPSTATS_PATH = get_emboss_path(SCRIPT_PATH) + "/"
+
     commandline = sys.argv[1:]
-    # -----------------------------------------------------------------------------------------------------------
+
     if commandline:
         FASTA_FILE, OPTION, noSP_option, SP_length, output_folder = functions.scan_arguments(commandline)
         # If no FASTA file was provided with the -i option
@@ -90,7 +100,7 @@ if __name__ == '__main__':
             functions.usage()
     else:
         functions.usage()
-    # -----------------------------------------------------------------------------------------------------------
+
     # Temporary folder 
     RESULTS_PATH = tempfile.mkdtemp() + '/'
     # -----------------------------------------------------------------------------------------------------------
@@ -98,7 +108,7 @@ if __name__ == '__main__':
     if output_folder:
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
-    # -----------------------------------------------------------------------------------------------------------
+
     # Check if FASTA file exists
     try:
         open(FASTA_FILE, 'r') 
@@ -275,3 +285,8 @@ if __name__ == '__main__':
     # Clean up and delete temporary folder that was created
     shutil.rmtree(RESULTS_PATH)
     # -----------------------------------------------------------------------------------------------------------
+    return
+
+
+if __name__ == '__main__':    
+    main()

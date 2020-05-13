@@ -21,3 +21,11 @@ Alternatively, you can install LOCALIZER on your machine to run it locally.
 For detailed installation instructions see here: http://localizer.csiro.au/software.html
 
 For help on how to interpret the output format, see http://localizer.csiro.au/output.html
+
+
+#### About this fork
+
+This fork just allows users to provide weka and emboss as separate packages to the distribution.
+To add Weka, download Weka 3.6.12 and point the environment variable `WEKA36` to the directory containing the `weka.jar` file.
+
+To add emboss, just make sure that `pepstats` is available somewhere on your `PATH`.
